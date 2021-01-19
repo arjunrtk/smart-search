@@ -1,0 +1,38 @@
+.card {
+    border-bottom: 1px solid #e6e6e6;
+    padding: 15px;
+    cursor: pointer;
+  }
+
+  .card:focus, .card:active {
+    background-color: #fefedc;
+    outline: none;
+  }
+
+  .emp-id {
+    font-size: 16px;
+    font-weight: 700;
+    display: block;
+    padding: 10px 0 2px 0;
+  }
+
+  .emp-name {
+    font-size: 16px;
+    font-style: italic;
+    display: block;
+    padding: 2px 0 5px 0;
+  }
+
+  .emp-address {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75ch;
+    font-size: 14px;
+    display: block;
+    padding: 5px 0 10px 0;
+  }
+
+  .highlight {
+    color: #5490ee;
+  }

@@ -1,14 +1,17 @@
-import logo from "./logo.svg";
 import "./App.css";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import EmpCard from "./components/EmpCard";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 function App() {
   const [empDetails, setEmpDetails] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-  const [activeOption, setActiveOption] = useState(0);
+  const [activeOption, setActiveOption] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
+  const [keyword, setKeyword] = useState("");
 
-  const optionsRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     fetch("https://randomuser.me/api/?inc=name,location,login,id&results=200")
@@ -22,6 +25,8 @@ function App() {
   const handleSearch = (e) => {
     if (e.length > 0) {
       setIsSearching(true);
+      setActiveOption(-1);
+      setKeyword(e);
       let suggestTemp = empDetails.filter((d) => {
         let name = `${d.name.title} ${d.name.first} ${d.name.last}`;
         let address = `${d.location.street.name} ${d.location.city} ${d.location.state} ${d.location.country}`;
@@ -40,63 +45,65 @@ function App() {
 
   const handleKeydown = (e) => {
     let activeId = activeOption;
-    let elm = optionsRef.current;
     if (e.keyCode === 38) {
       if (activeId !== 0) {
         activeId = activeId - 1;
+        setActiveOption(activeId);
       }
     } else if (e.keyCode === 40) {
       if (activeId !== suggestions.length - 1) {
         activeId = activeId + 1;
+        setActiveOption(activeId);
       }
-    }
-    setActiveOption(activeId);
-    if (
-      elm &&
-      elm.children.length > 0 &&
-      (e.keyCode === 40 || e.keyCode === 38)
-    ) {
-      elm.children[activeId].focus();
     }
   };
 
   const handleMouseEnter = (i) => {
-    let elm = optionsRef.current;
     setActiveOption(i);
-    if (elm && elm.children.length) {
-      elm.children[i].focus();
-    }
+  };
+
+  const handleClear = () => {
+    inputRef.current.value = "";
+    setSuggestions([]);
+    setIsSearching(false);
+    setActiveOption(-1);
   };
 
   return (
     <div className="search-wrapper" onKeyDown={(e) => handleKeydown(e)}>
-      <input
-        className="search-input"
-        onChange={(e) => handleSearch(e.target.value)}
-      />
+      <div className="input-wrapper">
+        <FontAwesomeIcon
+          icon={faSearch}
+          size="lg"
+          className="search-input__icon-search"
+        />
+        <input
+          ref={inputRef}
+          className="search-input"
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+        <FontAwesomeIcon
+          icon={faTimes}
+          size="lg"
+          className="search-input__icon-cross"
+          onClick={() => handleClear()}
+        />
+      </div>
       {suggestions.length === 0 && isSearching && (
         <div className="error-wrapper">No User Found</div>
       )}
-      <div className="suggestions-wrapper" ref={optionsRef}>
+      <div className="suggestions-wrapper">
         {suggestions.map((e, i) => {
           return (
-            <div
-              key={i}
-              className="card"
-              onMouseEnter={() => handleMouseEnter(i)}
-              tabIndex={i}
-            >
-              <h4>
-                {e.id.name} {e.id.value}
-              </h4>
-              <h3>
-                {e.name.title} {e.name.first} {e.name.last}
-              </h3>
-              <p>
-                {e.location.street.name} {e.location.street.number}{" "}
-                {e.location.city} {e.location.country}
-              </p>
-            </div>
+            <React.Fragment key={i}>
+              <EmpCard
+                empDetails={e}
+                index={i}
+                hoverCallback={handleMouseEnter}
+                isActive={i === activeOption}
+                text={keyword}
+              ></EmpCard>
+            </React.Fragment>
           );
         })}
       </div>
